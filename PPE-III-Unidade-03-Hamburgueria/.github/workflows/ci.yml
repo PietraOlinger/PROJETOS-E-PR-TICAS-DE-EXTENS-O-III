@@ -1,0 +1,41 @@
+name: CI - Testes, Cobertura e Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Instalar dependências do back-end
+        working-directory: PPE-III-Unidade-03-Hamburgueria/backend
+        run: npm install
+      - name: Instalar dependências do front-end
+        working-directory: PPE-III-Unidade-03-Hamburgueria/frontend
+        run: npm install
+      - name: Executar testes e cobertura do back-end
+        working-directory: PPE-III-Unidade-03-Hamburgueria/backend
+        env:
+          JWT_SECRET: segredo-do-ci
+        run: npm run test:coverage
+      - name: Executar testes e cobertura do front-end
+        working-directory: PPE-III-Unidade-03-Hamburgueria/frontend
+        run: npm run test:coverage
+      - name: Gerar build do front-end
+        working-directory: PPE-III-Unidade-03-Hamburgueria/frontend
+        run: npm run build
+      - name: Publicar relatórios de cobertura
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: |
+            PPE-III-Unidade-03-Hamburgueria/backend/coverage
+            PPE-III-Unidade-03-Hamburgueria/frontend/coverage
+          retention-days: 14
